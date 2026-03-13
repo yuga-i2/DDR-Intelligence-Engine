@@ -1,0 +1,53 @@
+# Environment (never commit API keys)
+.env
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Vector store and temp data
+chroma_db/
+data/vector_store/
+
+# Generated report outputs (keep folder but ignore generated files)
+outputs/*.pdf
+outputs/extraction_debug.json
+!outputs/sample_ddr_report.pdf
+!outputs/.gitkeep
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+/tmp/
+temp/
+
+# Image extraction folders
+inspection_images/
+thermal_images/
+
+# Node modules (if any frontend added later)
+node_modules/
+
+# Keep the example env template
+!.env.example
