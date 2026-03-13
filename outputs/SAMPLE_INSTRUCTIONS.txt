@@ -1,0 +1,79 @@
+SAMPLE DDR REPORT GENERATION
+════════════════════════════════════════════════════════════════
+
+To generate a sample Defect Diagnostic Report PDF:
+
+METHOD 1: Using the Web UI (Recommended)
+────────────────────────────────────────
+1. Start the Flask server:
+   
+   # On Windows:
+   .\run_demo.ps1
+   
+   # On macOS/Linux:
+   bash run_demo.sh
+
+2. Open http://localhost:5000 in your browser
+
+3. Upload two PDF files:
+   - Inspection Report (building inspection document)
+   - Thermal Images (thermal imaging analysis)
+
+4. Click "Generate DDR Report" and monitor the progress
+
+5. Download the generated DDR_Report.pdf when complete
+
+METHOD 2: Using the Command Line
+───────────────────────────────────
+1. Ensure you have inspection PDFs in the data/ directory:
+   - data/Sample_Report.pdf (inspection document)
+   - data/Thermal_Images.pdf (thermal imaging data)
+
+2. Run the pipeline:
+   python main.py --inspection data/Sample_Report.pdf --thermal data/Thermal_Images.pdf
+
+3. The generated PDF will be saved to:
+   outputs/DDR_Report_YYYYMMDD_HHMMSS.pdf
+
+REQUIREMENTS
+────────────
+✓ Python 3.11+ installed
+✓ All dependencies installed (pip install -r requirements.txt)
+✓ GROQ_API_KEY configured in .env (get free key at console.groq.com)
+✓ Poppler installed for PDF image extraction:
+  - macOS: brew install poppler
+  - Linux: sudo apt-get install poppler-utils
+  - Windows: Download from https://github.com/oschwartz10612/poppler-windows/releases/
+
+EXPECTED OUTPUT FORMAT
+──────────────────────
+The generated DDR includes 7 professional sections:
+
+1. Cover Page — Property address, inspection date, report metadata
+2. Property Issue Summary — Executive overview and severity breakdown
+3. Area-wise Observations — Findings grouped by location with photos
+4. Probable Root Cause — Causal analysis with confidence scores
+5. Severity Assessment — CRITICAL/HIGH/MEDIUM/LOW classifications
+6. Recommended Actions — Specific treatments with materials lists
+7. Additional Notes — Warnings and inspection limitations
+
+All sections are formatted with professional styling and the UrbanRoof 
+brand colors (#c0392b primary red).
+
+TROUBLESHOOTING
+───────────────
+Q: PDF generation fails with "WeasyPrint not available"
+A: Ensure GTK+ libraries are installed (Linux only by default)
+   Windows/macOS: Use WSL2 or install GTK+ manually
+
+Q: No images appear in the DDR
+A: Verify poppler-utils is installed and the thermal PDF contains images
+
+Q: GROQ API returns permission error
+A: Check that GROQ_API_KEY in .env is correct and not expired
+
+Q: Pipeline takes longer than 2 minutes
+A: This indicates self-correction loops. Verify input PDFs contain valid
+   inspection data. Check outputs/extraction_debug.json for extracted content.
+
+For more details, see README.md or PROJECT_REFERENCE.md
