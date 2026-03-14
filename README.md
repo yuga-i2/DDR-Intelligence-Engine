@@ -26,6 +26,14 @@ Upload two PDFs. Get a professional, evidence-grounded, spatially-reasoned DDR �
 
 ---
 
+## Demo
+
+[![DDR Intelligence Engine — Live Demo](https://img.youtube.com/vi/F_kEhTJ8KpA/maxresdefault.jpg)](https://youtu.be/F_kEhTJ8KpA?si=qa8--ea2480bmOcF)
+
+▶ [Watch the full demo on YouTube](https://youtu.be/F_kEhTJ8KpA?si=qa8--ea2480bmOcF) — upload to report in under 2 minutes.
+
+---
+
 ## Live Demo
 
 ```bash
