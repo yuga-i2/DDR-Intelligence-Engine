@@ -521,7 +521,15 @@ def run_pipeline(job_id, inspection_path, thermal_path):
     """
     try:
         # Import here to avoid loading everything at startup
-        from src.graph.workflow import compile_workflow
+        try:
+            from src.graph.workflow import compile_workflow
+            app_graph = compile_workflow()
+        except ImportError as e:
+            missing = str(e).replace("No module named ", "").strip("'")
+            raise RuntimeError(
+                f"Missing dependency: {missing}. "
+                f"Run: pip install {missing.split('.')[0]}"
+            ) from e
 
         logger.info(f"[{job_id}] Starting pipeline")
 
@@ -529,9 +537,6 @@ def run_pipeline(job_id, inspection_path, thermal_path):
         job_status[job_id]["progress"] = 10
         job_status[job_id]["message"] = "Parsing inspection report..."
         logger.info(f"[{job_id}] {job_status[job_id]['message']}")
-
-        # Compile workflow
-        app_graph = compile_workflow()
 
         # Update status: 25%
         job_status[job_id]["progress"] = 25

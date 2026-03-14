@@ -11,7 +11,13 @@ inspection cases, enhancing the diagnostic reasoning with historical patterns.
 import logging
 import os
 from typing import Any, Dict, List, Optional
-import chromadb
+
+try:
+    import chromadb
+    CHROMADB_AVAILABLE = True
+except (ImportError, Exception):
+    CHROMADB_AVAILABLE = False
+
 from src.graph.state import Observation, SemanticGraph
 
 logger = logging.getLogger(__name__)
@@ -38,6 +44,9 @@ class VectorStoreWrapper:
         Raises:
             ValueError: If persist_dir is invalid
         """
+        if not CHROMADB_AVAILABLE:
+            raise ImportError("ChromaDB not installed — system will run in rules-only mode")
+        
         if not persist_dir:
             raise ValueError("persist_dir cannot be empty")
         

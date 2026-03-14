@@ -1,53 +1,68 @@
-# Environment (never commit API keys)
+# Environment
 .env
+.env.local
+*.env
 
-# Python cache and compiled files
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.pytest_cache/
+*$py.class
+*.so
+.Python
+*.egg
 *.egg-info/
 dist/
 build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
 
-# Virtual environments
+# Virtual environment
 .venv/
 venv/
+ENV/
 env/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Generated outputs (never commit)
+outputs/*.pdf
+outputs/*.html
+outputs/*.json
+outputs/*.log
+outputs/*.txt
+!outputs/.gitkeep
 
 # IDE
-.vscode/settings.json
+.vscode/
 .idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
 
-# Vector store and temp data
-chroma_db/
-data/vector_store/
+# Internal/dev files (never commit)
+PHASE_*.md
+QUICKSTART.md
+SUBMISSION_CHECKLIST.md
+COPILOT_*.md
+STATUS_*.md
+*_STATUS.md
+install.py
+run_demo.ps1
+pipeline_output.txt
+verify_output.py
+create_test_pdfs.py
+docs/
 
-# Generated report outputs (keep folder but ignore generated files)
-outputs/*.pdf
-outputs/extraction_debug.json
-!outputs/sample_ddr_report.pdf
-!outputs/.gitkeep
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Logs
 *.log
-
-# Temp files
-*.tmp
-/tmp/
-temp/
-
-# Image extraction folders
-inspection_images/
-thermal_images/
-
-# Node modules (if any frontend added later)
-node_modules/
-
-# Keep the example env template
-!.env.example
+logs/

@@ -220,23 +220,23 @@ Based on all evidence above, identify:
                 if rule_results and len(rule_results) > 0:
                     best_rule = max(rule_results, key=lambda r: r.get("confidence", 0))
                     llm_result = {
-                        "root_cause_location": best_rule.get("probable_root_cause_location", observation.location),
+                        "root_cause_location": best_rule.get("probable_root_cause_location", obs.location),
                         "root_cause_type": best_rule.get("probable_root_cause_type", "Unknown"),
                         "causal_chain": best_rule.get("reasoning", "Determined by deterministic rules engine (LLM unavailable)."),
                         "confidence": best_rule.get("confidence", 0.75),
                         "rule_confirmation": f"LLM call failed. Using deterministic rule '{best_rule.get('rule_name', 'unknown')}' as fallback."
                     }
-                    logger.warning(f"  LLM failed — using rule fallback for {observation.location}: confidence={llm_result['confidence']}")
+                    logger.warning(f"  LLM failed — using rule fallback for {obs.location}: confidence={llm_result['confidence']}")
                 else:
                     # No rules matched either — create a minimal correlation from observation data
                     llm_result = {
-                        "root_cause_location": observation.location,
+                        "root_cause_location": obs.location,
                         "root_cause_type": "Further investigation required",
                         "causal_chain": "Automated reasoning was unavailable. Manual review recommended.",
                         "confidence": 0.50,
                         "rule_confirmation": "LLM unavailable and no deterministic rules matched."
                     }
-                    logger.warning(f"  LLM failed and no rules matched for {observation.location} — creating minimal correlation")
+                    logger.warning(f"  LLM failed and no rules matched for {obs.location} — creating minimal correlation")
             
             # ================================================================
             # STEP 5: Merge rule and LLM results

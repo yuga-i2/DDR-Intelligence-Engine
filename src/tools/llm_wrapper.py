@@ -1,8 +1,9 @@
 """
-LLM Wrapper — Centralized Interface to Groq LLM
+LLM Wrapper — Centralized Interface to Groq LLM via OpenAI-Compatible Endpoint
 
 This is the ONLY place in the entire codebase where the Groq LLM is called.
-All agents import and use the functions from this module, never importing langchain_groq directly.
+All agents import and use the functions from this module, never importing langchain_groq or chatgroq directly.
+Uses ChatOpenAI from langchain_openai pointed at Groq's OpenAI-compatible API endpoint.
 Provides a unified interface with built-in retry logic, JSON validation, and structured logging.
 """
 
@@ -13,25 +14,25 @@ import time
 from typing import Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 
 logger = logging.getLogger(__name__)
 
 # Module-level cache for LLM instance
-_llm_instance: Optional[ChatGroq] = None
+_llm_instance: Optional[ChatOpenAI] = None
 
 
-def get_llm() -> ChatGroq:
+def get_llm() -> Optional[ChatOpenAI]:
     """
-    Get or create the cached Groq LLM instance.
+    Get or create the cached Groq LLM instance via OpenAI-compatible endpoint.
     
     Reads GROQ_MODEL and GROQ_API_KEY from environment variables.
     Caches the instance so it is only created once per process.
+    Uses Groq's OpenAI-compatible API endpoint: https://api.groq.com/openai/v1
     
     Returns:
-        ChatGroq instance configured with:
-        - temperature=0.1 (deterministic output)
-        - max_tokens=2048 (reasonable limit for structured responses)
+        ChatOpenAI instance, or None if all initialization attempts fail.
+        When None, agents will gracefully fall back to rules-only mode.
     """
     global _llm_instance
     
@@ -40,19 +41,56 @@ def get_llm() -> ChatGroq:
         api_key = os.getenv("GROQ_API_KEY")
         
         if not api_key:
-            raise ValueError(
+            logger.warning(
                 "GROQ_API_KEY environment variable not set. "
-                "Please add it to your .env file."
+                "System will operate in rules-only mode without LLM."
             )
+            return None
         
-        logger.debug(f"Creating ChatGroq instance with model: {model}")
+        logger.debug(f"Creating ChatOpenAI instance with model: {model}")
         
-        _llm_instance = ChatGroq(
-            model=model,
-            temperature=0.1,
-            max_tokens=2048,
-            api_key=api_key
-        )
+        # Try full config first
+        try:
+            _llm_instance = ChatOpenAI(
+                model=model,
+                temperature=0.1,
+                max_tokens=2048,
+                api_key=api_key,
+                base_url="https://api.groq.com/openai/v1"
+            )
+            logger.info("✓ Groq OpenAI-compatible endpoint initialized with full config")
+            return _llm_instance
+        except Exception as e:
+            error_msg = str(e)
+            if "unexpected keyword argument" in error_msg or "proxies" in error_msg:
+                logger.warning(
+                    f"ChatOpenAI full config failed (version incompatibility): {error_msg}. "
+                    f"Retrying with minimal config..."
+                )
+                
+                # Try minimal config
+                try:
+                    _llm_instance = ChatOpenAI(
+                        model=model,
+                        api_key=api_key,
+                        base_url="https://api.groq.com/openai/v1"
+                    )
+                    logger.info("✓ Groq OpenAI-compatible endpoint initialized with minimal config (no temperature/max_tokens)")
+                    return _llm_instance
+                except Exception as e2:
+                    # Both attempts failed - graceful degradation
+                    logger.error(
+                        f"Groq OpenAI-compatible endpoint initialization failed on both attempts. "
+                        f"System will operate in rules-only mode.\n"
+                        f"  Attempt 1 (full config): {error_msg}\n"
+                        f"  Attempt 2 (minimal config): {str(e2)}"
+                    )
+                    _llm_instance = None
+                    return None
+            else:
+                logger.error(f"Groq OpenAI-compatible endpoint initialization failed with non-recoverable error: {e}")
+                _llm_instance = None
+                return None
     
     return _llm_instance
 
@@ -76,9 +114,17 @@ def call_llm(
         The response content (string, not parsed)
         
     Raises:
+        RuntimeError: If LLM is not available (system in rules-only mode)
         ValueError: If expect_json=True and JSON parsing fails after retry
     """
     llm = get_llm()
+    
+    # Check if LLM is available
+    if llm is None:
+        raise RuntimeError(
+            "LLM is not available. Groq endpoint initialization failed. "
+            "System is operating in rules-only mode."
+        )
     
     # Build messages
     messages = [
